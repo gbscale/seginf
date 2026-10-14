@@ -1,0 +1,56 @@
+version: '3.8'
+
+networks:
+  cliente_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
+  dmz_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.20.0/24
+
+services:
+  firewall:
+    build: ./firewall
+    container_name: gateway-firewall
+    cap_add:
+      - NET_ADMIN
+    networks:
+      cliente_net:
+        ipv4_address: 192.168.10.254
+      dmz_net:
+        ipv4_address: 192.168.20.254
+    restart: unless-stopped
+
+  cliente:
+    image: alpine:latest
+    container_name: estacao-cliente
+    command: tail -f /dev/null
+    networks:
+      cliente_net:
+        ipv4_address: 192.168.10.10
+    depends_on:
+      - firewall
+
+  dmz-web:
+    image: nginx:alpine
+    container_name: servidor-web-dmz
+    networks:
+      dmz_net:
+        ipv4_address: 192.168.20.10
+    depends_on:
+      - firewall
+
+  dmz-db:
+    image: postgres:alpine
+    container_name: servidor-db-dmz
+    environment:
+      POSTGRES_PASSWORD: secretpassword
+    networks:
+      dmz_net:
+        ipv4_address: 192.168.20.20
+    depends_on:
+      - firewall
