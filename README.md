@@ -10,9 +10,6 @@
 
 **Docente:** Prof. Roitier Campos Gonçalves
 
-**Modalidade:** Individual
-
-**Data de Entrega:** 15/10/2026
 
 ---
 
